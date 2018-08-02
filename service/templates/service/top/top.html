@@ -1,13 +1,13 @@
 {% extends "service/base.html" %}
 
-{% block title %}メニュー一覧{% endblock title %}
+{% block title %}メニュー{% endblock title %}
 
 {% block content %}
-    <h4 class="mt-4 border-bottom">請求一覧</h4>
+    <h4 class="mt-4 border-bottom">メニュー</h4>
 
-    <h5 class="my-4"><a href="{% url 'service:customer_list' %}" >顧客情報</a></h5>
-    <h5 class="my-4"><a href="{% url 'service:lesson_list' %}" >顧客履修情報</a></h5>
-    <h5 class="my-4"><a href="{% url 'service:bill_list' %}" >請求情報</a></h5>
-    <h5 class="my-4"><a href="{% url 'service:report_list' %}" >レポート情報</a></h5>
+    <h5 class="my-4"><a href="{% url 'service:customer_index' %}" >顧客情報</a></h5>
+    <h5 class="my-4"><a href="{% url 'service:lesson_index' %}" >顧客履修情報</a></h5>
+    <h5 class="my-4"><a href="{% url 'service:bill_index' %}" >請求情報</a></h5>
+    <h5 class="my-4"><a href="{% url 'service:report_index' %}" >レポート情報</a></h5>
 
 {% endblock content %}

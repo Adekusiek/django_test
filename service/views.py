@@ -1,15 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from .models import Customer, Lesson
-from .models import sex_genre_calculator
+from .models import report_calculator
 from .forms import CustomerForm, LessonForm
 
 def top(request):
     return render(request, 'service/top/top.html', {})
 
-def customer_list(request):
+def customer_index(request):
     customers = Customer.objects.all().order_by('id')
-    return render(request, 'service/customer/list.html', {'customers': customers})
+    return render(request, 'service/customer/index.html', {'customers': customers})
 
 def customer_edit(request, customer_id=None):
     if customer_id:
@@ -22,7 +22,7 @@ def customer_edit(request, customer_id=None):
         if form.is_valid():
             customer = form.save(commit=False)
             customer.save()
-            return redirect('service:customer_list')
+            return redirect('service:customer_index')
     else:
         form = CustomerForm(instance=customer)
 
@@ -31,13 +31,13 @@ def customer_edit(request, customer_id=None):
 def customer_del(request, customer_id):
     customer = get_object_or_404(Customer, pk=customer_id)
     customer.delete()
-    return redirect('service:customer_list')
+    return redirect('service:customer_index')
 
 
 
-def lesson_list(request):
+def lesson_index(request):
     lessons = Lesson.objects.all().order_by('id')
-    return render(request, 'service/lesson/list.html', {'lessons': lessons})
+    return render(request, 'service/lesson/index.html', {'lessons': lessons})
 
 def lesson_edit(request, lesson_id=None):
     if lesson_id:
@@ -54,7 +54,7 @@ def lesson_edit(request, lesson_id=None):
             if lesson_id:
                 lesson.check_update()
 
-            return redirect('service:lesson_list')
+            return redirect('service:lesson_index')
     else:
         form = LessonForm(instance=lesson)
 
@@ -63,19 +63,20 @@ def lesson_edit(request, lesson_id=None):
 def lesson_del(request, lesson_id):
     lesson = get_object_or_404(Lesson, pk=lesson_id)
     lesson.delete()
-    return redirect('service:lesson_list')
+    return redirect('service:lesson_index')
 
-def bill_list(request):
+def bill_index(request):
     customers = Customer.objects.all().select_related().order_by('id')
     customer_activities = []
     for customer in customers:
         customer_activities.append(customer.fetch_monthly_activity())
 
     customer_infos = zip(customers, customer_activities)
-    return render(request, 'service/bill/list.html', {'customer_infos': customer_infos})
+    return render(request, 'service/bill/index.html', {'customer_infos': customer_infos})
 
-def report_list(request):
+def report_index(request):
 
-    sex_genre_array = sex_genre_calculator()
+    sex_genre_array = report_calculator()
+    sex_genre_ageband_array = report_calculator(age_band_flg=True)
 
-    return render(request, 'service/report/list.html', {'sex_genre_array': sex_genre_array})
+    return render(request, 'service/report/index.html', {'sex_genre_array': sex_genre_array, 'sex_genre_ageband_array': sex_genre_ageband_array})

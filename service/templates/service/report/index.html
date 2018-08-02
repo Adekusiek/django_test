@@ -10,37 +10,48 @@
     <tr>
       <th scope="col">ジャンル</th>
       <th scope="col">性別</th>
-      <th scope="col">総レッスン数</th>
+      <th scope="col">レッスン数</th>
+      <th scope="col">受講者数</th>
+      <th scope="col">売り上げ</th>
     </tr>
   </thead>
   <tbody>
-    {% for sex, curriculum, lesson_count in sex_genre_array %}
+    {% for sex, curriculum, lesson_count, total_customer, total_sales in sex_genre_array %}
     <tr>
       <td>{{ sex }}</td>
       <td>{{ curriculum }}</td>
       <td>{{ lesson_count }}</td>
+      <td>{{ total_customer }}</td>
+      <td>{{ total_sales }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
-<h5 class="mt-5 border-bottom">性別年代別</h5>
+<h5 class="mt-5 border-bottom">性別ジャンル年代別</h5>
 <table class="table table-striped table-bordered">
   <thead>
     <tr>
       <th scope="col">ジャンル</th>
       <th scope="col">性別</th>
-      <th scope="col">総レッスン数</th>
+      <th scope="col">年代</th>
+      <th scope="col">レッスン数</th>
+      <th scope="col">受講者数</th>
+      <th scope="col">売り上げ</th>
     </tr>
   </thead>
   <tbody>
-    {% for sex, curriculum, lesson_count in sex_genre_array %}
+    {% for sex, curriculum, age_band, lesson_count, total_customer, total_sales in sex_genre_ageband_array %}
     <tr>
       <td>{{ sex }}</td>
       <td>{{ curriculum }}</td>
+      <td>{{ age_band }}代</td>
       <td>{{ lesson_count }}</td>
+      <td>{{ total_customer }}</td>
+      <td>{{ total_sales }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+<a href="{% url 'service:top' %}" class="btn btn-info btn-sm my-3">メニュー一覧</a>
 {% endblock content %}

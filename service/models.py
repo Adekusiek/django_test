@@ -3,7 +3,22 @@ from django.core import validators
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from collections import Counter
+import numpy as np
 
+
+'''
+Class Customer
+
+Properties:
+    name
+    sex
+    age
+    created_at
+
+Methods:
+    fetch_activity:
+    fetch_monthly_activity:
+'''
 class Customer(models.Model):
 
     sex_choices = ((1,'男性'),(2,'女性'),)
@@ -43,6 +58,20 @@ class Customer(models.Model):
             joint_genre = joint_genre[:-1]
 
         return joint_genre, lessons_count, total_charge
+
+'''
+Class Curriculum
+
+Properties:
+    name
+
+Methods:
+    charge_calculator:
+    programming_charge_calculator:
+    english_charge_calculator:
+    finance_charge_calculator:
+
+'''
 
 class Curriculum(models.Model):
 
@@ -89,6 +118,22 @@ class Curriculum(models.Model):
         else:
             return 3300*20 + 2800*30 + 2500*(h-50)
 
+
+'''
+Class Lesson
+
+Properties:
+    date
+    hours
+    charge
+
+Methods:
+    get_charge:
+    check_update:
+    report_calculator:
+
+'''
+
 class Lesson(models.Model):
 
     customer   = models.ForeignKey(Customer, verbose_name='顧客', related_name='lessons', on_delete=models.CASCADE)
@@ -126,7 +171,7 @@ class Lesson(models.Model):
                 lesson_to_update.save()
 
 
-def sex_genre_calculator(prev_month=0):
+def report_calculator(age_band_flg=False, prev_month=0):
 
     today = date.today()
     first_day_of_month = today + relativedelta(months=prev_month) - timedelta(days=today.day-1)
@@ -141,10 +186,34 @@ def sex_genre_calculator(prev_month=0):
 
     data_array = []
 
-    for s_k, s_v in sex_choices.items():
-        for c_k, c_v in curriculum_choices.items():
+    # 性別　x　ジャンル　レポート機能
+    if age_band_flg:
+        for s_k, s_v in sex_choices.items():
+            for c_k, c_v in curriculum_choices.items():
                 lesson_list = [l for l in list(lessons) if l.customer.sex == s_k and l.curriculum_id == c_k]
-                lesson_count = len(lesson_list)
-                data_array.append([s_v, c_v, lesson_count])
+                age_list = [l.customer.age for l in lesson_list]
+                bins = np.arange(10, 100, 10)
+                age_bands = np.digitize(age_list, bins)
+
+                for i in np.arange(1, 8):
+                    lesson_at_age_band = []
+                    for lesson, age_band in zip(lesson_list, age_bands):
+                        if age_band == i:
+                            lesson_at_age_band.append(lesson)
+
+                    lesson_count = len(lesson_at_age_band)                                   # レッスン数
+                    customer_count = len(set([l.customer for l in lesson_at_age_band ]))     # 受講者数
+                    total_charge = sum([l.charge for l in lesson_at_age_band ])              # 売り上げ
+                    data_array.append([s_v, c_v, bins[i-1], lesson_count, customer_count, total_charge])
+
+    # 性別　x　ジャンル　レポート機能
+    else:
+        for s_k, s_v in sex_choices.items():
+            for c_k, c_v in curriculum_choices.items():
+                lesson_list = [l for l in list(lessons) if l.customer.sex == s_k and l.curriculum_id == c_k]
+                lesson_count = len(lesson_list)                                   # レッスン数
+                customer_count = len(set([l.customer for l in lesson_list ]))     # 受講者数
+                total_charge = sum([l.charge for l in lesson_list ])              # 売り上げ
+                data_array.append([s_v, c_v, lesson_count, customer_count, total_charge])
 
     return data_array
