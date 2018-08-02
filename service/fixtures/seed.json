@@ -1,23 +1,23 @@
 [
-{
-  "model": "service.curriculum",
-  "pk": 1,
-  "fields":{
-    "name": "プログラミング",
+  {
+    "model": "service.curriculum",
+    "pk": 1,
+    "fields": {
+      "name": "プログラミング"
+    }
+  },
+  {
+    "model": "service.curriculum",
+    "pk": 2,
+    "fields": {
+      "name": "英語"
+    }
+  },
+  {
+    "model": "service.curriculum",
+    "pk": 3,
+    "fields": {
+      "name": "ファイナンス"
+    }
   }
-},
-{
-  "model": "service.curriculum",
-  "pk": 2,
-  "fields":{
-    "name": "英語",
-  }
-},
-{
-  "model": "service.curriculum",
-  "pk": 3,
-  "fields":{
-    "name": "経理",
-  }
-},
 ]

@@ -1,0 +1,24 @@
+{% extends "service/base.html" %}
+
+{% load bootstrap4 %}
+
+{% block title %}レッスン受講記録登録{% endblock title %}
+
+{% block content%}
+  <h4 class="mt-4 mb-5 border-bottom">レッスン受講記録登録</h4>
+  {% if lesson_id %}
+    <form action="{% url 'service:lesson_mod' lesson_id=lesson_id %}" method="post">
+  {% else %}
+    <form action="{% url 'service:lesson_add' %}" method="post">
+  {% endif %}
+  {% csrf_token %}
+
+  {% bootstrap_form form layout='horizontal' %}
+    <div class="form-group row">
+      <div class="offset-md-3 col-md-9">
+        <button type="submit" class="btn btn-primary">登録</button>
+      </div>
+    </div>
+  </form>
+  <a href="{% url 'service:lesson_list' %}" class="btn btn-secondary btn-sm">戻る</a>
+{% endblock content%}

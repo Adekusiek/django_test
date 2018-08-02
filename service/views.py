@@ -31,3 +31,32 @@ def customer_del(request, customer_id):
     customer = get_object_or_404(Customer, pk=customer_id)
     customer.delete()
     return redirect('service:customer_list')
+
+
+
+def lesson_list(request):
+    lessons = Lesson.objects.all().order_by('id')
+    return render(request, 'service/lesson/list.html', {'lessons': lessons})
+
+def lesson_edit(request, lesson_id=None):
+    if lesson_id:
+        lesson = get_object_or_404(Lesson, pk=lesson_id)
+    else:
+        lesson = Lesson()
+
+    if request.method == 'POST':
+        form = LessonForm(request.POST, instance=lesson)
+        if form.is_valid():
+            lesson = form.save(commit=False)
+            lesson.charge = lesson.get_charge()
+            lesson.save()
+            return redirect('service:lesson_list')
+    else:
+        form = LessonForm(instance=lesson)
+
+    return render(request, 'service/lesson/edit.html', dict(form=form, lesson_id=lesson_id))
+
+def lesson_del(request, lesson_id):
+    lesson = get_object_or_404(Lesson, pk=lesson_id)
+    lesson.delete()
+    return redirect('service:lesson_list')
