@@ -14,7 +14,7 @@ urlpatterns = [
     path('lesson/del/<int:lesson_id>', views.lesson_del, name='lesson_del'),
 
     path('bill/', views.bill_list, name='bill_list'),
-    # path('report/', views.report_list, name='report_list'),
+    path('report/', views.report_list, name='report_list'),
 
     path('', views.top, name='top'),
 

@@ -24,20 +24,25 @@ class Customer(models.Model):
     def sex__str__(self):
         return dict(self.sex_choices)[self.sex]
 
-    # def fetch_monthly_activity(self, prev_month=3):
-    #     today = date.today()
-    #     first_day_of_month = today + relativedelta(months=1) - timedelta(days=today.day)
+    def fetch_monthly_activity(self, prev_month=0):
+        today = date.today()
+        first_day_of_month = today + relativedelta(months=prev_month) - timedelta(days=today.day-1)
+        end_day_of_month   = today + relativedelta(months=prev_month+1) - timedelta(days=today.day)
+        return self.fetch_activity(first_day_of_month, end_day_of_month)
 
-    def fetch_monthly_activity(self, start_date, end_date):
+    def fetch_activity(self, start_date, end_date):
         lessons = self.lessons.filter(date__gte=start_date, date__lte=end_date)
-        monthly_lessons_count = len(lessons)
-        monthly_total_charge = sum([l.charge for l in list(lessons)])
+        lessons_count = len(lessons)
+        total_charge = sum([l.charge for l in list(lessons)])
         lessons_counter = Counter([l.curriculum.name for l in list(lessons)])
-        monthly_genre = ""
+        joint_genre = ""
         for k, v in lessons_counter.items():
-            monthly_genre = "%s%s(%s)/"%(monthly_genre, k, v)
+            joint_genre = "%s%s(%s)/"%(joint_genre, k, v)
 
-        return monthly_genre, monthly_lessons_count, monthly_total_charge
+        if joint_genre.endswith('/'):
+            joint_genre = joint_genre[:-1]
+
+        return joint_genre, lessons_count, total_charge
 
 class Curriculum(models.Model):
 
@@ -97,10 +102,49 @@ class Lesson(models.Model):
         return self.customer.name
 
     def get_charge(self):
-        lessons = Lesson.objects.filter(customer=self.customer, curriculum=self.curriculum)
-        cumulated_hours = sum([i.hours for i in list(lessons) if not i == self]) # 自分を除く
+        the_day = self.date
+        first_day_of_month = the_day + relativedelta(months=0) - timedelta(days=the_day.day-1)
+        end_day_of_month   = the_day + relativedelta(months=1) - timedelta(days=the_day.day)
 
-        # cumulated_hours = sum(list(customers.values_list('hours', flat=True)))
+        lessons = Lesson.objects.filter(customer=self.customer, curriculum=self.curriculum, date__gte=first_day_of_month, date__lte=the_day)
+        cumulated_hours = sum([i.hours for i in list(lessons) if not i == self]) # NOTE: 自分を除く. curriculum x dateのuidでunique validationとしてもよい？
+
         charge = self.curriculum.charge_calculator(cumulated_hours, self.hours)
 
         return charge
+
+        """　もし受講時間を修正する場合、それよりも後に行った当月分の履修受講料を更新しなければならない　"""
+    def check_update(self):
+        the_day = self.date
+        end_day_of_month   = the_day + relativedelta(months=1) - timedelta(days=the_day.day)
+
+        lessons_to_update = Lesson.objects.filter(customer=self.customer, curriculum=self.curriculum, date__gt=the_day, date__lte=end_day_of_month)
+
+        if lessons_to_update:
+            for lesson_to_update in lessons_to_update:
+                lesson_to_update.charge = lesson_to_update.get_charge()
+                lesson_to_update.save()
+
+
+def sex_genre_calculator(prev_month=0):
+
+    today = date.today()
+    first_day_of_month = today + relativedelta(months=prev_month) - timedelta(days=today.day-1)
+    end_day_of_month   = today + relativedelta(months=prev_month+1) - timedelta(days=today.day)
+
+    lessons = Lesson.objects.filter(date__gte=first_day_of_month, date__lte=end_day_of_month).select_related()
+
+    sex_choices = dict(((1,'男性'),(2,'女性'),))
+
+    curriculums = Curriculum.objects.all()
+    curriculum_choices = dict([(q.id, q.name) for q in curriculums ])
+
+    data_array = []
+
+    for s_k, s_v in sex_choices.items():
+        for c_k, c_v in curriculum_choices.items():
+                lesson_list = [l for l in list(lessons) if l.customer.sex == s_k and l.curriculum_id == c_k]
+                lesson_count = len(lesson_list)
+                data_array.append([s_v, c_v, lesson_count])
+
+    return data_array

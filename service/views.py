@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from .models import Customer, Lesson
+from .models import sex_genre_calculator
 from .forms import CustomerForm, LessonForm
 
 def top(request):
@@ -50,6 +51,9 @@ def lesson_edit(request, lesson_id=None):
             lesson = form.save(commit=False)
             lesson.charge = lesson.get_charge()
             lesson.save()
+            if lesson_id:
+                lesson.check_update()
+
             return redirect('service:lesson_list')
     else:
         form = LessonForm(instance=lesson)
@@ -60,3 +64,18 @@ def lesson_del(request, lesson_id):
     lesson = get_object_or_404(Lesson, pk=lesson_id)
     lesson.delete()
     return redirect('service:lesson_list')
+
+def bill_list(request):
+    customers = Customer.objects.all().select_related().order_by('id')
+    customer_activities = []
+    for customer in customers:
+        customer_activities.append(customer.fetch_monthly_activity())
+
+    customer_infos = zip(customers, customer_activities)
+    return render(request, 'service/bill/list.html', {'customer_infos': customer_infos})
+
+def report_list(request):
+
+    sex_genre_array = sex_genre_calculator()
+
+    return render(request, 'service/report/list.html', {'sex_genre_array': sex_genre_array})
