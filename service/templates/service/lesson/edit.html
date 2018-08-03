@@ -4,6 +4,14 @@
 
 {% block title %}レッスン受講記録登録{% endblock title %}
 
+{% block extra_js %}
+<script>
+$(function() {
+    $("#id_date").datepicker();
+  });
+</script>
+{% endblock extra_js %}
+
 {% block content%}
   <h4 class="mt-4 mb-5 border-bottom">レッスン受講記録登録</h4>
   {% if lesson_id %}
@@ -20,5 +28,5 @@
       </div>
     </div>
   </form>
-  <a href="{% url 'service:lesson_list' %}" class="btn btn-secondary btn-sm">戻る</a>
+  <a href="{% url 'service:lesson_index' %}" class="btn btn-secondary btn-sm">戻る</a>
 {% endblock content%}

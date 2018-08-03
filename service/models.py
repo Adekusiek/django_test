@@ -16,7 +16,6 @@ Properties:
     created_at
 
 Methods:
-    fetch_activity:
     fetch_monthly_activity:
 '''
 class Customer(models.Model):
@@ -39,14 +38,8 @@ class Customer(models.Model):
     def sex__str__(self):
         return dict(self.sex_choices)[self.sex]
 
-    def fetch_monthly_activity(self, prev_month=0):
-        today = date.today()
-        first_day_of_month = today + relativedelta(months=prev_month) - timedelta(days=today.day-1)
-        end_day_of_month   = today + relativedelta(months=prev_month+1) - timedelta(days=today.day)
-        return self.fetch_activity(first_day_of_month, end_day_of_month)
-
-    def fetch_activity(self, start_date, end_date):
-        lessons = self.lessons.filter(date__gte=start_date, date__lte=end_date)
+    def fetch_monthly_activity(self):
+        lessons = self.lessons.all()
         lessons_count = len(lessons)
         total_charge = sum([l.charge for l in list(lessons)])
         lessons_counter = Counter([l.curriculum.name for l in list(lessons)])
@@ -169,51 +162,3 @@ class Lesson(models.Model):
             for lesson_to_update in lessons_to_update:
                 lesson_to_update.charge = lesson_to_update.get_charge()
                 lesson_to_update.save()
-
-
-def report_calculator(age_band_flg=False, prev_month=0):
-
-    today = date.today()
-    first_day_of_month = today + relativedelta(months=prev_month) - timedelta(days=today.day-1)
-    end_day_of_month   = today + relativedelta(months=prev_month+1) - timedelta(days=today.day)
-
-    lessons = Lesson.objects.filter(date__gte=first_day_of_month, date__lte=end_day_of_month).select_related()
-
-    sex_choices = dict(((1,'男性'),(2,'女性'),))
-
-    curriculums = Curriculum.objects.all()
-    curriculum_choices = dict([(q.id, q.name) for q in curriculums ])
-
-    data_array = []
-
-    # 性別　x　ジャンル　レポート機能
-    if age_band_flg:
-        for s_k, s_v in sex_choices.items():
-            for c_k, c_v in curriculum_choices.items():
-                lesson_list = [l for l in list(lessons) if l.customer.sex == s_k and l.curriculum_id == c_k]
-                age_list = [l.customer.age for l in lesson_list]
-                bins = np.arange(10, 100, 10)
-                age_bands = np.digitize(age_list, bins)
-
-                for i in np.arange(1, 8):
-                    lesson_at_age_band = []
-                    for lesson, age_band in zip(lesson_list, age_bands):
-                        if age_band == i:
-                            lesson_at_age_band.append(lesson)
-
-                    lesson_count = len(lesson_at_age_band)                                   # レッスン数
-                    customer_count = len(set([l.customer for l in lesson_at_age_band ]))     # 受講者数
-                    total_charge = sum([l.charge for l in lesson_at_age_band ])              # 売り上げ
-                    data_array.append([s_v, c_v, bins[i-1], lesson_count, customer_count, total_charge])
-
-    # 性別　x　ジャンル　レポート機能
-    else:
-        for s_k, s_v in sex_choices.items():
-            for c_k, c_v in curriculum_choices.items():
-                lesson_list = [l for l in list(lessons) if l.customer.sex == s_k and l.curriculum_id == c_k]
-                lesson_count = len(lesson_list)                                   # レッスン数
-                customer_count = len(set([l.customer for l in lesson_list ]))     # 受講者数
-                total_charge = sum([l.charge for l in lesson_list ])              # 売り上げ
-                data_array.append([s_v, c_v, lesson_count, customer_count, total_charge])
-
-    return data_array
