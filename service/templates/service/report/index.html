@@ -5,9 +5,17 @@
 {% block content %}
 <h4 class="mt-4 border-bottom">レポート一覧</h4>
 
-{% for month_str, prev_month in month_infos %}
-<a href="{% url 'service:report_index'%}?prev_month={{ prev_month }}"   class="btn btn-info btn-sm my-3">{{ month_str }}</a>
-{% endfor %}
+<form action="{% url 'service:report_index' %}" method="get" name="select_month">
+  <div>
+    <label for="prev_month">請求月</label>
+    <select name="prev_month">
+      {% for month_str, prev_month in month_infos %}
+        <option value="{{ prev_month }}">{{ month_str }}</option>
+      {% endfor %}
+    </select>
+    <button>検索</button>
+  </div>
+</form>
 
 <h5 class="mt-5 border-bottom">ジャンル性別</h5>
 <table class="table table-striped table-bordered">
@@ -59,4 +67,14 @@
   </tbody>
 </table>
 <a href="{% url 'service:top' %}" class="btn btn-info btn-sm my-3">メニュー一覧</a>
+
+{% load static %}
+<script src="{% static "service/js/service.js" %}"></script>
+
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+  document.select_month.prev_month.value = set_prev_month();
+</script>
+{% endblock extra_js %}

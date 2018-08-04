@@ -1,7 +1,10 @@
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
-from .models import Customer, Lesson, Curriculum
 import numpy as np
+
+from .customer import Customer
+from .curriculum import Curriculum
+from .lesson import Lesson
 
 # returns the array of [["2018/3", 0], ["2018/2", -1],["2018/1", -2],["2017/12", -3]...]
 def get_month_array(num_of_months=3):

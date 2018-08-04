@@ -1,15 +1,19 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.db.models import Prefetch
-from .models import Customer, Lesson
+from .models import *
 from .forms import CustomerForm, LessonForm
-from .utils import get_month_array, get_start_end_month, report_calculator
+
 
 
 def top(request):
     return render(request, 'service/top/top.html')
 
-''' customer view '''
+'''
+
+    customer view
+
+'''
 
 def customer_index(request):
     customers = Customer.objects.all().order_by('id')
@@ -70,7 +74,11 @@ def lesson_del(request, lesson_id):
     return redirect('service:lesson_index')
 
 
-''' bill view '''
+'''
+
+    bill view
+
+'''
 
 def bill_index(request):
 
@@ -95,7 +103,11 @@ def bill_index(request):
 
 
 
-''' report view '''
+'''
+
+    report view
+
+'''
 
 def report_index(request):
 
